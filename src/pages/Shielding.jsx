@@ -1,27 +1,43 @@
 import ImagingLayout from "../components/ImagingLayout";
 
-
 export default function Shielding() {
   return (
     <ImagingLayout
       title="Shielding Navigation"
       links={[
-        "Radiation Shielding Requirements",
-        "Lead-Lined Barriers",
-        "Window & Door Shielding",
-        "Blueprint & Room Design",
-        "Regulatory References",
+        "Accreditation",
+        "Quality Control",
+        "Protocol Optimization",
+        "FAQ",
       ]}
       content={
-        <>
-          <h2 className="text-3xl font-bold text-blue-700 mb-4">Shielding</h2>
-          <p className="text-gray-800 leading-relaxed mb-3">
-            Radiation Services Inc. offers assistance to facilities constructing or modifying diagnostic imaging rooms using ionizing radiation. Our physicists generate precise shielding design plans using regulatory and NCRP guidance.
+        <div className="px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8 max-w-3xl mx-auto font-sans">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-blue-700 mb-3 sm:mb-4 leading-snug">
+            Shielding
+          </h2>
+
+          <p className="text-gray-800 text-sm sm:text-sm md:text-base leading-relaxed mb-3 sm:mb-4 tracking-wide font-light">
+            Proper radiation shielding is essential for safety. We provide shielding design, installation, and
+            compliance verification for all facilities.
           </p>
-          <p className="text-gray-800">
-            Please <a href="/contact" className="text-blue-700 underline hover:text-blue-900">contact us</a> today to learn more about how Radiation Services, Inc. can help you.
+
+          <ul className="list-disc pl-5 sm:pl-6 text-gray-800 mb-3 sm:mb-4 space-y-1 text-sm sm:text-sm md:text-base leading-relaxed font-light">
+            <li>Shielding Assessment</li>
+            <li>Installation Guidance</li>
+            <li>Regulatory Compliance</li>
+          </ul>
+
+          <p className="text-gray-800 text-sm sm:text-sm md:text-base leading-relaxed tracking-wide font-light">
+            Please{" "}
+            <a
+              href="/contact"
+              className="text-blue-700 underline hover:text-blue-900 font-medium transition-colors duration-300"
+            >
+              contact us
+            </a>{" "}
+            for Shielding services.
           </p>
-        </>
+        </div>
       }
     />
   );

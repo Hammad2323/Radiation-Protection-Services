@@ -1,27 +1,43 @@
 import ImagingLayout from "../components/ImagingLayout";
 
-
 export default function RadiationSafety() {
   return (
     <ImagingLayout
       title="Radiation Safety Navigation"
       links={[
-        "Radiation Safety Training for Fluoroscopy Operators",
-        "ACR Endorses AAPM Patient Shielding Policy",
-        "AAPM Patient Shielding in Radiology Policy",
-        "Personnel Protection during Fluoroscopic Procedures",
-        "IAEA Webinar: Patient Radiation Management in Interventional Fluoroscopy",
+        "Accreditation",
+        "Quality Control",
+        "Protocol Optimization",
+        "FAQ",
       ]}
       content={
-        <>
-          <h2 className="text-3xl font-bold text-blue-700 mb-4">Radiation Safety</h2>
-          <p className="text-gray-800 leading-relaxed mb-3">
-            (Detailed text content can be added here later.) Radiation Services, Inc. offers comprehensive radiation safety consultation, personnel protection guidance, and training for radiology professionals.
+        <div className="px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8 max-w-3xl mx-auto font-sans">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-blue-700 mb-3 sm:mb-4 leading-snug">
+            Radiation Safety
+          </h2>
+
+          <p className="text-gray-800 text-sm sm:text-sm md:text-base leading-relaxed mb-3 sm:mb-4 tracking-wide font-light">
+            Ensuring radiation safety is our top priority. We provide audits, compliance checks, and staff training to
+            minimize risks and maintain high safety standards.
           </p>
-          <p className="text-gray-800">
-            Please <a href="/contact" className="text-blue-700 underline hover:text-blue-900">contact us</a> to learn more about our safety training and compliance support.
+
+          <ul className="list-disc pl-5 sm:pl-6 text-gray-800 mb-3 sm:mb-4 space-y-1 text-sm sm:text-sm md:text-base leading-relaxed font-light">
+            <li>Safety Audits</li>
+            <li>Staff Training</li>
+            <li>Regulatory Compliance</li>
+          </ul>
+
+          <p className="text-gray-800 text-sm sm:text-sm md:text-base leading-relaxed tracking-wide font-light">
+            Please{" "}
+            <a
+              href="/contact"
+              className="text-blue-700 underline hover:text-blue-900 font-medium transition-colors duration-300"
+            >
+              contact us
+            </a>{" "}
+            for Radiation Safety support.
           </p>
-        </>
+        </div>
       }
     />
   );

@@ -17,10 +17,11 @@ import Contact from "./pages/Contact";
 import CT from "./pages/CT";
 import MRI from "./pages/MRI";
 import Mammography from "./pages/Mammography";
+import PNRA from "./pages/PNRA";
 import Nuclear from "./pages/Nuclear";
 import Radiography from "./pages/Radiography";
 import Shielding from "./pages/Shielding";
-import RadiationSafety from "./pages/Radiationsafety";
+import RadiationSafety from "./pages/RadiationSafety";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -51,6 +52,7 @@ function App() {
         <Route path="/ct" element={<CT />} />
         <Route path="/mri" element={<MRI />} />
         <Route path="/mammography" element={<Mammography />} />
+        <Route path="/pnra" element={<PNRA />} />
         <Route path="/nuclear" element={<Nuclear />} />
         <Route path="/radiography" element={<Radiography />} />
         <Route path="/shielding" element={<Shielding />} />

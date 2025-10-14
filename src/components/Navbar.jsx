@@ -11,22 +11,22 @@ export default function Navbar() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-gradient-to-r from-[#061433] via-[#0a1f50] to-[#122c66] text-cyan-100"
+        className="bg-black text-white" // Jet Black background
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-2 border-b border-cyan-300/20">
-          <h1 className="text-lg font-semibold tracking-wide text-cyan-300 drop-shadow-[0_0_6px_rgba(0,255,255,0.3)]">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-2 py-1 md:px-6 md:py-2 gap-2 md:gap-0">
+          <h1 className="text-[11px] sm:text-xs md:text-lg font-semibold tracking-wide whitespace-nowrap flex-shrink">
             Radiation Protection & QC Services
           </h1>
-          <div className="flex gap-8">
+          <div className="flex gap-2 sm:gap-4 md:gap-8 flex-shrink">
             <Link
               to="/contact"
-              className="hover:text-cyan-400 transition-colors duration-300"
+              className="hover:text-cyan-400 transition-colors duration-300 text-[11px] sm:text-xs md:text-base whitespace-nowrap"
             >
               Contact Us
             </Link>
             <Link
               to="/account"
-              className="hover:text-cyan-400 transition-colors duration-300"
+              className="hover:text-cyan-400 transition-colors duration-300 text-[11px] sm:text-xs md:text-base whitespace-nowrap"
             >
               Your Account
             </Link>
@@ -39,7 +39,7 @@ export default function Navbar() {
         initial={{ opacity: 0, y: -15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.2 }}
-        className="bg-[#0b1a33] text-cyan-100 relative border-b border-cyan-400/10"
+        className="bg-[#333333] text-white relative border-b border-cyan-400/10" // Charcoal Black background
       >
         {/* Sweeping light animation */}
         <motion.div
@@ -48,20 +48,19 @@ export default function Navbar() {
           transition={{ repeat: Infinity, duration: 7, ease: "linear" }}
         />
 
-        <div className="max-w-7xl mx-auto px-6 py-3 relative z-10">
-          <ul className="flex flex-wrap gap-10 text-base font-medium justify-center md:justify-start">
+        <div className="max-w-7xl mx-auto px-2 py-2 md:px-6 relative z-10">
+          <ul className="flex justify-center md:justify-start gap-2 sm:gap-4 md:gap-6 flex-shrink text-[11px] sm:text-xs md:text-base font-medium">
             {[
               { to: "/", label: "Home" },
               { to: "/services", label: "Our Services" },
               { to: "/ionising-radiation", label: "Ionising Radiation" },
-              { to: "/customers", label: "Our Customers" },
               { to: "/about", label: "About Us" },
               { to: "/feedback", label: "Feedback" },
             ].map((item) => (
-              <li key={item.to}>
+              <li key={item.to} className="flex-shrink-0">
                 <Link
                   to={item.to}
-                  className="group relative hover:text-cyan-400 transition-all duration-300"
+                  className="group relative hover:text-cyan-400 transition-all duration-300 whitespace-nowrap"
                 >
                   {item.label}
                   <span className="absolute left-1/2 -translate-x-1/2 bottom-0 w-0 h-[2px] bg-cyan-400 transition-all duration-300 group-hover:w-3/4"></span>
