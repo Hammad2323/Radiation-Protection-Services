@@ -11,24 +11,28 @@ export default function Navbar() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-black text-white" // Jet Black background
+        className="bg-black text-white"
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-2 py-1 md:px-6 md:py-2 gap-2 md:gap-0">
-          <h1 className="text-[11px] sm:text-xs md:text-lg font-semibold tracking-wide whitespace-nowrap flex-shrink">
-            Radiation Protection & QC Services
-          </h1>
+          {/* Logo + Title */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <img
+              src="/logo.jpg"
+              alt="Logo"
+              className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 rounded-full object-cover shadow-md"
+            />
+            <h1 className="text-[11px] sm:text-xs md:text-lg font-semibold tracking-wide whitespace-nowrap flex-shrink">
+              Radiation Protection & QC Services
+            </h1>
+          </div>
+
+          {/* Contact Link */}
           <div className="flex gap-2 sm:gap-4 md:gap-8 flex-shrink">
             <Link
               to="/contact"
               className="hover:text-cyan-400 transition-colors duration-300 text-[11px] sm:text-xs md:text-base whitespace-nowrap"
             >
               Contact Us
-            </Link>
-            <Link
-              to="/account"
-              className="hover:text-cyan-400 transition-colors duration-300 text-[11px] sm:text-xs md:text-base whitespace-nowrap"
-            >
-              Your Account
             </Link>
           </div>
         </div>
@@ -39,7 +43,7 @@ export default function Navbar() {
         initial={{ opacity: 0, y: -15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.2 }}
-        className="bg-[#333333] text-white relative border-b border-cyan-400/10" // Charcoal Black background
+        className="bg-[#333333] text-white relative border-b border-cyan-400/10"
       >
         {/* Sweeping light animation */}
         <motion.div
