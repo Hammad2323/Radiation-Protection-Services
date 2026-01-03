@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Star, X } from "lucide-react";
+import { db } from "../firebase/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 const StarRating = ({ value, onChange }) => {
   const [hover, setHover] = useState(null);
@@ -52,32 +54,31 @@ const FeedbackPage = () => {
   const saveToStorage = (key, data) =>
     localStorage.setItem(key, JSON.stringify(data));
 
-  // enforce maximum items in list
   const enforceLimit = (list, key, limit) => {
     if (list.length > limit) {
-      const fresh = list.slice(0, limit); // keep newest at top
+      const fresh = list.slice(0, limit);
       saveToStorage(key, fresh);
       return fresh;
     }
     return list;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!rating) return;
 
     const id = Date.now();
     const date = new Date().toISOString();
 
-    // save rating
+    
     let nextRatings = [{ id, name: name.trim(), rating, date }, ...allRatings];
     nextRatings = enforceLimit(nextRatings, "allRatings", 50);
     setAllRatings(nextRatings);
     saveToStorage("allRatings", nextRatings);
 
-    // save text feedback if 5 stars
+    let nextFb = fiveStarFeedback;
     if (rating === 5 && text.trim()) {
-      let nextFb = [
+      nextFb = [
         {
           id,
           name: name.trim() || "Anonymous",
@@ -87,13 +88,24 @@ const FeedbackPage = () => {
         },
         ...fiveStarFeedback,
       ];
-      // keep only 10 newest written feedbacks
       nextFb = enforceLimit(nextFb, "fiveStarFeedback", 10);
       setFiveStarFeedback(nextFb);
       saveToStorage("fiveStarFeedback", nextFb);
     }
 
-    // reset form
+   
+    try {
+      await addDoc(collection(db, "feedback"), {
+        name: name.trim() || "Anonymous",
+        rating,
+        text: text.trim() || "",
+        date: serverTimestamp(),
+      });
+    } catch (err) {
+      console.error("Error saving feedback to Firebase:", err);
+    }
+
+   
     setName("");
     setRating(0);
     setText("");
@@ -105,13 +117,10 @@ const FeedbackPage = () => {
     saveToStorage("fiveStarFeedback", updated);
   };
 
-  // ====== Rating breakdown logic =======
   const totalRatings = allRatings.length;
   const averageRating =
     totalRatings > 0
-      ? (
-          allRatings.reduce((acc, r) => acc + r.rating, 0) / totalRatings
-        ).toFixed(1)
+      ? (allRatings.reduce((acc, r) => acc + r.rating, 0) / totalRatings).toFixed(1)
       : 0;
 
   const starCounts = [1, 2, 3, 4, 5].map(
@@ -125,27 +134,16 @@ const FeedbackPage = () => {
     const stars = [];
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <Star
-          key={`full-${i}`}
-          className="w-6 h-6 fill-blue-500 stroke-blue-500"
-        />
+        <Star key={`full-${i}`} className="w-6 h-6 fill-blue-500 stroke-blue-500" />
       );
     }
     if (hasHalf) {
       stars.push(
-        <Star
-          key="half"
-          className="w-6 h-6 fill-blue-200 stroke-blue-500"
-        />
+        <Star key="half" className="w-6 h-6 fill-blue-200 stroke-blue-500" />
       );
     }
     while (stars.length < 5) {
-      stars.push(
-        <Star
-          key={`empty-${stars.length}`}
-          className="w-6 h-6 stroke-gray-300"
-        />
-      );
+      stars.push(<Star key={`empty-${stars.length}`} className="w-6 h-6 stroke-gray-300" />);
     }
     return stars;
   };
@@ -160,9 +158,8 @@ const FeedbackPage = () => {
           Rate your experience from 1 to 5 stars.
         </p>
 
-        {/* Rating breakdown */}
+      
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-          {/* Left */}
           <div className="text-center md:text-left">
             <div className="text-5xl md:text-6xl font-extrabold text-blue-600">
               {averageRating}
@@ -175,33 +172,27 @@ const FeedbackPage = () => {
             </div>
           </div>
 
-          {/* Right */}
           <div className="space-y-2">
             {[5, 4, 3, 2, 1].map((star) => {
               const count = starCounts[star - 1];
-              const percent =
-                totalRatings > 0 ? (count / totalRatings) * 100 : 0;
+              const percent = totalRatings > 0 ? (count / totalRatings) * 100 : 0;
               return (
                 <div key={star} className="flex items-center gap-2">
-                  <span className="w-5 text-sm font-medium text-gray-700">
-                    {star}
-                  </span>
+                  <span className="w-5 text-sm font-medium text-gray-700">{star}</span>
                   <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-500 rounded-full transition-all"
                       style={{ width: `${percent}%` }}
                     ></div>
                   </div>
-                  <span className="w-8 text-right text-sm text-gray-500">
-                    {count}
-                  </span>
+                  <span className="w-8 text-right text-sm text-gray-500">{count}</span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Feedback form */}
+       
         <form onSubmit={handleSubmit} className="mt-10 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -246,7 +237,7 @@ const FeedbackPage = () => {
           </button>
         </form>
 
-        {/* 5-star feedback */}
+     
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-blue-700">
             Customer 5★ Feedback
