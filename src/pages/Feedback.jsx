@@ -70,15 +70,15 @@ const FeedbackPage = () => {
     const id = Date.now();
     const date = new Date().toISOString();
 
-    
+    // Save rating locally
     let nextRatings = [{ id, name: name.trim(), rating, date }, ...allRatings];
     nextRatings = enforceLimit(nextRatings, "allRatings", 50);
     setAllRatings(nextRatings);
     saveToStorage("allRatings", nextRatings);
 
-    let nextFb = fiveStarFeedback;
+    // Save 5-star feedback locally
     if (rating === 5 && text.trim()) {
-      nextFb = [
+      let nextFb = [
         {
           id,
           name: name.trim() || "Anonymous",
@@ -93,7 +93,7 @@ const FeedbackPage = () => {
       saveToStorage("fiveStarFeedback", nextFb);
     }
 
-   
+    // --- Firestore write ---
     try {
       await addDoc(collection(db, "feedback"), {
         name: name.trim() || "Anonymous",
@@ -102,10 +102,10 @@ const FeedbackPage = () => {
         date: serverTimestamp(),
       });
     } catch (err) {
-      console.error("Error saving feedback to Firebase:", err);
+      console.error("Error writing feedback to Firestore:", err);
     }
+    // -----------------------
 
-   
     setName("");
     setRating(0);
     setText("");
@@ -120,7 +120,9 @@ const FeedbackPage = () => {
   const totalRatings = allRatings.length;
   const averageRating =
     totalRatings > 0
-      ? (allRatings.reduce((acc, r) => acc + r.rating, 0) / totalRatings).toFixed(1)
+      ? (
+          allRatings.reduce((acc, r) => acc + r.rating, 0) / totalRatings
+        ).toFixed(1)
       : 0;
 
   const starCounts = [1, 2, 3, 4, 5].map(
@@ -134,7 +136,10 @@ const FeedbackPage = () => {
     const stars = [];
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <Star key={`full-${i}`} className="w-6 h-6 fill-blue-500 stroke-blue-500" />
+        <Star
+          key={`full-${i}`}
+          className="w-6 h-6 fill-blue-500 stroke-blue-500"
+        />
       );
     }
     if (hasHalf) {
@@ -143,7 +148,9 @@ const FeedbackPage = () => {
       );
     }
     while (stars.length < 5) {
-      stars.push(<Star key={`empty-${stars.length}`} className="w-6 h-6 stroke-gray-300" />);
+      stars.push(
+        <Star key={`empty-${stars.length}`} className="w-6 h-6 stroke-gray-300" />
+      );
     }
     return stars;
   };
@@ -158,7 +165,7 @@ const FeedbackPage = () => {
           Rate your experience from 1 to 5 stars.
         </p>
 
-      
+        {/* Rating breakdown */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
           <div className="text-center md:text-left">
             <div className="text-5xl md:text-6xl font-extrabold text-blue-600">
@@ -171,7 +178,6 @@ const FeedbackPage = () => {
               {totalRatings} ratings total
             </div>
           </div>
-
           <div className="space-y-2">
             {[5, 4, 3, 2, 1].map((star) => {
               const count = starCounts[star - 1];
@@ -192,7 +198,7 @@ const FeedbackPage = () => {
           </div>
         </div>
 
-       
+        {/* Feedback form */}
         <form onSubmit={handleSubmit} className="mt-10 space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -237,7 +243,7 @@ const FeedbackPage = () => {
           </button>
         </form>
 
-     
+        {/* 5-star feedback */}
         <section className="mt-10">
           <h2 className="text-2xl font-bold text-blue-700">
             Customer 5★ Feedback

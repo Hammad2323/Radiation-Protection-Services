@@ -1,8 +1,9 @@
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
-
+// Firebase config using environment variables
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -13,7 +14,7 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const db = getFirestore(app);
