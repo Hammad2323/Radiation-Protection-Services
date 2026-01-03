@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Star, X } from "lucide-react";
+import { Star } from "lucide-react";
 import { db } from "../firebase/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "firebase/firestore";
 
 const StarRating = ({ value, onChange }) => {
   const [hover, setHover] = useState(null);
@@ -22,9 +22,7 @@ const StarRating = ({ value, onChange }) => {
           >
             <Star
               className={`w-7 h-7 transition-transform ${
-                active
-                  ? "fill-blue-500 stroke-blue-500 scale-105"
-                  : "stroke-gray-400"
+                active ? "fill-blue-500 stroke-blue-500 scale-105" : "stroke-gray-400"
               }`}
             />
           </button>
@@ -42,58 +40,23 @@ const FeedbackPage = () => {
   const [allRatings, setAllRatings] = useState([]);
   const [fiveStarFeedback, setFiveStarFeedback] = useState([]);
 
+  // Fetch all ratings in real-time
   useEffect(() => {
-    try {
-      const r = JSON.parse(localStorage.getItem("allRatings") || "[]");
-      const f = JSON.parse(localStorage.getItem("fiveStarFeedback") || "[]");
-      setAllRatings(r);
-      setFiveStarFeedback(f);
-    } catch {}
+    const q = query(collection(db, "feedback"), orderBy("date", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const feedbackData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAllRatings(feedbackData);
+
+      const fiveStar = feedbackData.filter(f => f.rating === 5).slice(0, 10);
+      setFiveStarFeedback(fiveStar);
+    });
+    return () => unsubscribe();
   }, []);
-
-  const saveToStorage = (key, data) =>
-    localStorage.setItem(key, JSON.stringify(data));
-
-  const enforceLimit = (list, key, limit) => {
-    if (list.length > limit) {
-      const fresh = list.slice(0, limit);
-      saveToStorage(key, fresh);
-      return fresh;
-    }
-    return list;
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!rating) return;
 
-    const id = Date.now();
-    const date = new Date().toISOString();
-
-    // Save rating locally
-    let nextRatings = [{ id, name: name.trim(), rating, date }, ...allRatings];
-    nextRatings = enforceLimit(nextRatings, "allRatings", 50);
-    setAllRatings(nextRatings);
-    saveToStorage("allRatings", nextRatings);
-
-    // Save 5-star feedback locally
-    if (rating === 5 && text.trim()) {
-      let nextFb = [
-        {
-          id,
-          name: name.trim() || "Anonymous",
-          text: text.trim(),
-          rating: 5,
-          date,
-        },
-        ...fiveStarFeedback,
-      ];
-      nextFb = enforceLimit(nextFb, "fiveStarFeedback", 10);
-      setFiveStarFeedback(nextFb);
-      saveToStorage("fiveStarFeedback", nextFb);
-    }
-
-    // --- Firestore write ---
     try {
       await addDoc(collection(db, "feedback"), {
         name: name.trim() || "Anonymous",
@@ -104,25 +67,16 @@ const FeedbackPage = () => {
     } catch (err) {
       console.error("Error writing feedback to Firestore:", err);
     }
-    // -----------------------
 
     setName("");
     setRating(0);
     setText("");
   };
 
-  const removeFeedback = (id) => {
-    const updated = fiveStarFeedback.filter((f) => f.id !== id);
-    setFiveStarFeedback(updated);
-    saveToStorage("fiveStarFeedback", updated);
-  };
-
   const totalRatings = allRatings.length;
   const averageRating =
     totalRatings > 0
-      ? (
-          allRatings.reduce((acc, r) => acc + r.rating, 0) / totalRatings
-        ).toFixed(1)
+      ? (allRatings.reduce((acc, r) => acc + r.rating, 0) / totalRatings).toFixed(1)
       : 0;
 
   const starCounts = [1, 2, 3, 4, 5].map(
@@ -135,22 +89,13 @@ const FeedbackPage = () => {
     const hasHalf = val - fullStars >= 0.5;
     const stars = [];
     for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <Star
-          key={`full-${i}`}
-          className="w-6 h-6 fill-blue-500 stroke-blue-500"
-        />
-      );
+      stars.push(<Star key={`full-${i}`} className="w-6 h-6 fill-blue-500 stroke-blue-500" />);
     }
     if (hasHalf) {
-      stars.push(
-        <Star key="half" className="w-6 h-6 fill-blue-200 stroke-blue-500" />
-      );
+      stars.push(<Star key="half" className="w-6 h-6 fill-blue-200 stroke-blue-500" />);
     }
     while (stars.length < 5) {
-      stars.push(
-        <Star key={`empty-${stars.length}`} className="w-6 h-6 stroke-gray-300" />
-      );
+      stars.push(<Star key={`empty-${stars.length}`} className="w-6 h-6 stroke-gray-300" />);
     }
     return stars;
   };
@@ -171,12 +116,8 @@ const FeedbackPage = () => {
             <div className="text-5xl md:text-6xl font-extrabold text-blue-600">
               {averageRating}
             </div>
-            <div className="flex justify-center md:justify-start mt-2">
-              {renderStars(averageRating)}
-            </div>
-            <div className="text-gray-500 mt-1 text-sm">
-              {totalRatings} ratings total
-            </div>
+            <div className="flex justify-center md:justify-start mt-2">{renderStars(averageRating)}</div>
+            <div className="text-gray-500 mt-1 text-sm">{totalRatings} ratings total</div>
           </div>
           <div className="space-y-2">
             {[5, 4, 3, 2, 1].map((star) => {
@@ -186,10 +127,7 @@ const FeedbackPage = () => {
                 <div key={star} className="flex items-center gap-2">
                   <span className="w-5 text-sm font-medium text-gray-700">{star}</span>
                   <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 rounded-full transition-all"
-                      style={{ width: `${percent}%` }}
-                    ></div>
+                    <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${percent}%` }}></div>
                   </div>
                   <span className="w-8 text-right text-sm text-gray-500">{count}</span>
                 </div>
@@ -201,9 +139,7 @@ const FeedbackPage = () => {
         {/* Feedback form */}
         <form onSubmit={handleSubmit} className="mt-10 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Your name (optional)
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Your name (optional)</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -213,17 +149,13 @@ const FeedbackPage = () => {
           </div>
 
           <div className="text-center">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your rating
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Your rating</label>
             <StarRating value={rating} onChange={setRating} />
           </div>
 
           {rating === 5 && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Your feedback (optional)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Your feedback (optional)</label>
               <textarea
                 rows={4}
                 value={text}
@@ -245,35 +177,21 @@ const FeedbackPage = () => {
 
         {/* 5-star feedback */}
         <section className="mt-10">
-          <h2 className="text-2xl font-bold text-blue-700">
-            Customer 5★ Feedback
-          </h2>
+          <h2 className="text-2xl font-bold text-blue-700">Customer 5★ Feedback</h2>
           {fiveStarFeedback.length === 0 ? (
             <p className="text-gray-600 mt-2">No 5★ written feedback yet.</p>
           ) : (
             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               {fiveStarFeedback.map((fb) => (
-                <div
-                  key={fb.id}
-                  className="relative rounded-xl border border-blue-100 p-4 shadow-sm bg-white"
-                >
-                  <button
-                    onClick={() => removeFeedback(fb.id)}
-                    className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
-                  >
-                    <X size={16} />
-                  </button>
+                <div key={fb.id} className="relative rounded-xl border border-blue-100 p-4 shadow-sm bg-white">
                   <div className="flex items-center gap-1 mb-2">
                     {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="w-4 h-4 fill-blue-500 stroke-blue-500"
-                      />
+                      <Star key={i} className="w-4 h-4 fill-blue-500 stroke-blue-500" />
                     ))}
                   </div>
                   <p className="text-gray-800">{fb.text}</p>
                   <div className="mt-3 text-xs text-gray-500">
-                    — {fb.name} · {new Date(fb.date).toLocaleDateString()}
+                    — {fb.name} · {fb.date?.toDate ? fb.date.toDate().toLocaleDateString() : ""}
                   </div>
                 </div>
               ))}
